@@ -2,7 +2,7 @@ import csv
 import os
 import cv2
 
-IMG_DIR = r"C:\Users\LYZ\Documents\Code\CNNNetwork\train"  #在此处修改为测试图片的地址
+IMG_DIR = r"C:\Users\LYZ\Documents\Code\CNNNetwork\train"  # 在此处修改为测试图片的地址
 
 
 def convert_img_to_csv(img_dir):
@@ -21,9 +21,8 @@ def convert_img_to_csv(img_dir):
             for img_name in img_list:
                 img_path = os.path.join(img_file_path, img_name)
                 img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-                img = img - 255
-                img *= 255
-                image_data = [i -1]
+                img = ~img
+                image_data = [i - 1]
                 image_data.extend(img.flatten())
                 # print(image_data)
                 writer.writerow(image_data)
