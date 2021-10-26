@@ -110,8 +110,8 @@ for epoch in range(num_epochs):
         images = get_variable(images)
         labels = get_variable(labels)
 
-        # print(images[0])
-        # print(labels[0])
+        print(images[0])
+        print(labels[0])
         outputs = net(images)
 
         optimizer.zero_grad()
