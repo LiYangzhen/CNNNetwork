@@ -9,6 +9,7 @@ from torch.autograd import Variable
 import os
 
 from MyDataset import MyDataset
+from model import CNN
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 batch_size = 64
@@ -28,59 +29,36 @@ def get_variable(x):
 # return nn.DataParallel(x, device_ids=[0])if torch.cuda.device_count() > 1 else x
 # 如果有多个gpu时可以选择上面的语句，例如上面写的时设备0
 
-train_dataset = torchvision.datasets.ImageFolder('train',
-                                                 transform=transforms.Compose([
-                                                     transforms.Resize((28, 28)),  # 将图片缩放到指定大小（h,w）或者保持长宽比并缩放最短的边到int大小
-                                                     transforms.CenterCrop(28),
-                                                     transforms.ToTensor()])
-                                                 )
+# train_dataset = torchvision.datasets.ImageFolder('train',
+#                                                  transform=transforms.Compose([
+#                                                      transforms.Resize((28, 28)),  # 将图片缩放到指定大小（h,w）或者保持长宽比并缩放最短的边到int大小
+#                                                      transforms.CenterCrop(28),
+#                                                      transforms.ToTensor()])
+#                                                  )
+#
+# test_dataset = torchvision.datasets.ImageFolder('test',
+#                                                 transform=transforms.Compose([
+#                                                     transforms.Resize((28, 28)),  # 将图片缩放到指定大小（h,w）或者保持长宽比并缩放最短的边到int大小
+#                                                     transforms.CenterCrop(28),
+#                                                     transforms.ToTensor()])
+#                                                 )
 
-test_dataset = torchvision.datasets.ImageFolder('test',
-                                                transform=transforms.Compose([
-                                                    transforms.Resize((28, 28)),  # 将图片缩放到指定大小（h,w）或者保持长宽比并缩放最短的边到int大小
-                                                    transforms.CenterCrop(28),
-                                                    transforms.ToTensor()])
-                                                )
+train_dataset = MyDataset('train.csv', transforms.ToTensor(), transforms.ToTensor())
+test_dataset = MyDataset('test_data.csv', transforms.ToTensor(), transforms.ToTensor())
 
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
-indices = range(len(test_dataset))
-indices_val = indices
-
+# indices = range(len(test_dataset))
+# indices_val = indices
 
 # 通过下标对验证集和测试集进行采样
-sampler_val = torch.utils.data.sampler.SubsetRandomSampler(indices_val)
+# sampler_val = torch.utils.data.sampler.SubsetRandomSampler(indices_val)
 # sampler_test = torch.utils.data.sampler.SubsetRandomSampler(indices_test)
 
 # 根据采样器来定义加载器，然后加载数据
-validation_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, sampler=sampler_val)
+test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=True)
 
 # test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, sampler=sampler_test)
-
-
-# 两层卷积
-class CNN(nn.Module):
-    def __init__(self):
-        super(CNN, self).__init__()
-        # 使用序列工具快速构建
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(1, 16, kernel_size=5, padding=2),
-            nn.BatchNorm2d(16),
-            nn.ReLU(),
-            nn.MaxPool2d(2))
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(16, 32, kernel_size=5, padding=2),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d(2))
-        self.fc = nn.Linear(7 * 7 * 32, 12)
-
-    def forward(self, x):
-        out = self.conv1(x)
-        out = self.conv2(out)
-        out = out.view(out.size(0), -1)  # reshape
-        out = self.fc(out)
-        return out
 
 
 net = CNN()
@@ -126,7 +104,7 @@ for epoch in range(num_epochs):
         if i % 100 == 0:
             net.eval()  # 给网络模型做标记，将模型转换为测试模式。
             val_accuracy = []  # 记录校验数据集准确率的容器
-            for (data, target) in validation_loader:  # 计算校验集上面的准确度
+            for (data, target) in test_loader:  # 计算校验集上面的准确度
 
                 output = net(get_variable(data))  # 完成一次前馈计算过程，得到目前训练得到的模型net在校验数据集上的表现
                 accuracies = accuracy(output, get_variable(target))  # 计算准确率所需数值，返回正确的数值为（正确样例数，总样本数）

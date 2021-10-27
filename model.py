@@ -14,7 +14,7 @@ class CNN(nn.Module):
             nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.MaxPool2d(2))
-        self.fc = nn.Linear(7 * 7 * 32, 10)  # ?
+        self.fc = nn.Linear(7 * 7 * 32, 12)  # ?
 
     def forward(self, x):
         out = self.conv1(x)
