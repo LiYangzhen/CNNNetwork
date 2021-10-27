@@ -7,53 +7,28 @@ from torch.utils.data import Dataset
 
 
 class MyDataset(Dataset):
-    def __init__(self, path, transform=None, target_transform=None):
-        self.path = path
-        self.dirlist = os.listdir(path)
-        self.label_cnt = len(self.dirlist)
+    def __init__(self, root, transform=None, target_transform=None):
+        self.root = root
+        self.dir_list = os.listdir(root)
+        self.label_cnt = len(self.dir_list)
 
-        imglist = []
+        img_list = []
 
-        for path in self.dirlist:
-            sublist = os.listdir(os.path.join(self.path, path))
-            for subpath in sublist:
-                imglist.append(subpath)
-        self.imglist = imglist
-
-        # y = []
-        # x = []
-        # with open(csv_path, 'r') as f:
-        #     reader = csv.reader(f)
-        #     header_row = next(reader)
-        #     # print(header_row)
-        #     for row in reader:
-        #         y.append(int(row[0]))
-        #         a = list(map(float, row[1:]))
-        #         x.append(list(map(int, a)))
-        # self.data = x
-        # self.label = y
+        for path in self.dir_list:
+            sublist = os.listdir(os.path.join(self.root, path))
+            for sub_path in sublist:
+                img_list.append(sub_path)
+        self.img_list = img_list
         self.transform = transform
         self.target_transform = target_transform
-        # print(len(self.label))
 
     def __getitem__(self, index):
         label = index % 12
-        path = os.path.join(self.path, self.dirlist[label], self.imglist[index])
+        path = os.path.join(self.root, self.dir_list[label], self.img_list[index])
         img = Image.open(path)
         if self.transform is not None:
             img = self.transform(img)  # 是否进行transform
-
         return img, label
 
-        # label = self.label[index]
-        # # 读取图像文件
-        # image = self.data[index]
-        # if self.transform is not None:
-        #     image = self.transform(numpy.array(image))  # 是否进行transform
-        #
-        # # if self.target_transform is not None:
-        # #     label = self.target_transform(label)
-        # return image, label  # 返回每一个index对应的图片数据和对应的label
-
     def __len__(self):
-        return len(self.imglist)
+        return len(self.img_list)
