@@ -7,14 +7,13 @@ from torch.autograd import Variable
 
 
 # 见数据加载器和batch
+from MyDataset import MyDataset
 from model import CNN
 
-test_dataset = torchvision.datasets.MNIST(root='./data', train=False, transform=transforms.ToTensor(), download=True)
+test_dataset = MyDataset('test', transforms.ToTensor(), transforms.ToTensor())
 
 
-data_loader_test=torch.utils.data.DataLoader(dataset=test_dataset,
-                                             batch_size=4,
-                                             shuffle=True)
+data_loader_test=torch.utils.data.DataLoader(dataset=test_dataset,batch_size=64,shuffle=True)
 
 model = CNN()
 model.load_state_dict(torch.load('cnn.pkl'))

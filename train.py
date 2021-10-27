@@ -1,23 +1,17 @@
-import numpy as np
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
-import torchvision
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
+from torchvision import transforms
 from torch.autograd import Variable
 import os
-
 from MyDataset import MyDataset
 from model import CNN
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 batch_size = 64
 learning_rate = 0.001
-num_epochs = 1
-
-
-# image_size = 28  # 图像的总尺寸28*28
+num_epochs = 5
 
 
 # 将数据处理成Variable, 如果有GPU, 可以转成cuda形式
@@ -29,37 +23,13 @@ def get_variable(x):
 # return nn.DataParallel(x, device_ids=[0])if torch.cuda.device_count() > 1 else x
 # 如果有多个gpu时可以选择上面的语句，例如上面写的时设备0
 
-# train_dataset = torchvision.datasets.ImageFolder('train',
-#                                                  transform=transforms.Compose([
-#                                                      transforms.Resize((28, 28)),  # 将图片缩放到指定大小（h,w）或者保持长宽比并缩放最短的边到int大小
-#                                                      transforms.CenterCrop(28),
-#                                                      transforms.ToTensor()])
-#                                                  )
-#
-# test_dataset = torchvision.datasets.ImageFolder('test',
-#                                                 transform=transforms.Compose([
-#                                                     transforms.Resize((28, 28)),  # 将图片缩放到指定大小（h,w）或者保持长宽比并缩放最短的边到int大小
-#                                                     transforms.CenterCrop(28),
-#                                                     transforms.ToTensor()])
-#                                                 )
-
-train_dataset = MyDataset('train.csv', transforms.ToTensor(), transforms.ToTensor())
-test_dataset = MyDataset('test_data.csv', transforms.ToTensor(), transforms.ToTensor())
+train_dataset = MyDataset('train', transforms.ToTensor(), transforms.ToTensor())
+test_dataset = MyDataset('test', transforms.ToTensor(), transforms.ToTensor())
 
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
-# indices = range(len(test_dataset))
-# indices_val = indices
-
-# 通过下标对验证集和测试集进行采样
-# sampler_val = torch.utils.data.sampler.SubsetRandomSampler(indices_val)
-# sampler_test = torch.utils.data.sampler.SubsetRandomSampler(indices_test)
-
 # 根据采样器来定义加载器，然后加载数据
 test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=True)
-
-# test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, sampler=sampler_test)
-
 
 net = CNN()
 if torch.cuda.is_available():
@@ -69,8 +39,6 @@ if torch.cuda.is_available():
 loss_func = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
-
-# print(cnn)
 
 def accuracy(predictions, labels):
     # torch.max的输出：out (tuple, optional维度) – the result tuple of two output tensors (max, max_indices)
@@ -88,8 +56,8 @@ for epoch in range(num_epochs):
         images = get_variable(images)
         labels = get_variable(labels)
 
-        print(images[0])
-        print(labels[0])
+        # print(images[0])
+        # print(labels[0])
         outputs = net(images)
 
         optimizer.zero_grad()
@@ -136,7 +104,6 @@ for epoch in range(num_epochs):
 torch.save(net.state_dict(), 'cnn.pkl')
 
 plt.figure(figsize=(10, 7))
-# record2 = torch.Tensor(record)
 record2 = torch.Tensor(record).numpy().tolist()
 plt.plot(record2)
 plt.xlabel('Steps')
